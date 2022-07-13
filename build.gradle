@@ -1,0 +1,74 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'maven-publish'
+apply plugin: "org.sonarqube"
+
+android {
+    compileSdk rootProject.ext.compileSdkVersion
+    
+    defaultConfig {
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility "$rootProject.ext.java_version"
+        targetCompatibility "$rootProject.ext.java_version"
+    }
+
+    kotlinOptions {
+        jvmTarget = "$rootProject.ext.java_version"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    namespace 'com.leovp.camera2live'
+
+    publishing {
+        // Publishes "release" build variant with "release" component created by
+        // Android Gradle plugin
+        singleVariant("release")
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api "androidx.appcompat:appcompat:$rootProject.ext.appcompatVersion"
+
+    implementation project(':androidbase-sdk')
+    implementation project(':yuv-sdk')
+    implementation project(':lib-exif')
+
+    // ===== The following dependencies are needed in [androidbase-sdk] module =====
+    implementation project(':log-sdk')
+    implementation project(':lib-json')
+    implementation project(':lib-bytes')
+    implementation project(':lib-image')
+    implementation project(':lib-common-android')
+    implementation project(':lib-common-kotlin')
+    // ==============================
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.yhz61010'
+                artifactId = 'camera2live-sdk'
+                version = "$rootProject.ext.camera2LiveSdkVersion"
+            }
+        }
+    }
+}
